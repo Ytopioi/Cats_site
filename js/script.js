@@ -1,27 +1,27 @@
 'use strict';
 // common elements
 
-const imgNeed = ['/img/logo.png', '/img/like.svg', '/img/close.png'];
+const imgNeed = ['./img/logo.png', './img/close.png'];
 
 const body = document.querySelector('body');
 body.className = 'body';
 
 //add modal popup
 
-const popupBack = document.createElement('div');
 const popup = document.createElement('div');
+const popupContainer = document.createElement('div');
 const popupCont = document.createElement('div');
 const popupClose = document.createElement('div');
 
-popupBack.className = 'popup__back';
 popup.className = 'popup';
+popupContainer.className = 'popup__container';
 popupCont.className = 'popup__content';
 popupClose.className = 'popup__close';
-popupClose.style.backgroundImage = `url(${imgNeed[2]})`;
+popupClose.style.backgroundImage = `url(${imgNeed[1]})`;
 
-popup.append(popupCont, popupClose);
-popupBack.append(popup)
-body.append(popupBack);
+popupContainer.append(popupCont, popupClose);
+popup.append(popupContainer)
+body.append(popup);
 
 //add header, main, footer
 
@@ -52,9 +52,9 @@ headerBox.append(logo, contact);
 
 
 //add cards to main
-const conteiner = document.createElement('div');
-conteiner.className = 'main__conteiner';
-main.append(conteiner)
+const container = document.createElement('div');
+container.className = 'main__container';
+main.append(container)
 
 // console.log(cats[0].img_link);
 
@@ -62,18 +62,18 @@ let mainContent = '';
 
 cats.forEach(cat => {
     mainContent +=
-        `<div class="conteiner__card" id="${cat.id}">
-        <div class="conteiner__card-img" style="background-image: url(${cat.img_link})"></div>
-        <h3 class="conteiner__catName">${cat.name}</h3>
-        <div class="conteiner__catRate" data-rate='${cat.rate}'>
+        `<div class="container__card" id="${cat.id}">
+        <div class="container__card-img" style="background-image: url(${cat.img_link})"></div>
+        <h3 class="container__catName">${cat.name}</h3>
+        <div class="container__catRate" data-rate='${cat.rate}'>
         </div>
     </div>`;
 
 })
 
-conteiner.innerHTML += mainContent;
+container.innerHTML += mainContent;
 
-let rateCont = document.querySelectorAll('.conteiner__catRate');
+let rateCont = document.querySelectorAll('.container__catRate');
 
 rateCont.forEach(el => {
     let n = '';
@@ -101,17 +101,16 @@ rateCont.forEach(el => {
 })
 
 //add event to cards to open popup
-const cards = document.querySelectorAll('.conteiner__card');
+const cards = document.querySelectorAll('.container__card');
 let result = '';
 
 const showPopup = function (text) {
-    popupBack.classList.add('popup__active');
-    popup.style.backgroundColor = 'white';
+    popup.classList.add('popup__active');
+    popupContainer.style.backgroundColor = 'white';
     popupCont.innerHTML = text;
 
-    // cards.classList.add('disabled')
-    body.style.backgroundColor = '#0006';
-    body.style.overflow = 'hidden';
+    // body.style.backgroundColor = '#0006';
+    // body.style.overflow = 'hidden';
 }
 
 cards.forEach(el => {
@@ -138,8 +137,7 @@ cards.forEach(el => {
             </div>`
         el.addEventListener('click', e => {
             console.log(e);
-            // el.classList.add('disabled')
-            e.path[2].classList.add('disabled')
+
             if (el.getAttribute('id') == cat.id) {
                 
                 showPopup(n)
@@ -166,35 +164,34 @@ tilda.innerHTML = `Icons are provided by Tilda Publishing`;
 footer.append(footerBox);
 footerBox.append(copyright, tilda);
 
-//add close functions
-
+//add closes functions
+    //close button
 const closePopup = function (e) {
-    popupBack.classList.remove('popup__active');
-    conteiner.classList.remove('disabled');
+    console.log(e);
+    popup.classList.remove('popup__active');
     
     body.style.backgroundColor = '';
     body.style.overflow = '';
 }
-// добавила чтобы закрыть окно по клику на body
-// const closePopup1 = function (e) {
-//     e.target.firstElementChild.classList.remove('popup__active');
-//     e.path[2].classList.remove('disabled');
-//     console.log(e);
-//     e.target.style.backgroundColor = '';
-//     e.target.style.overflow = '';
-// }
-// добавила закрыть по esc
-const closePopup2 = function (e) {
+
+    // close Esc
+const handlerEscClosePopup = function (e) {
     if (e.keyCode == 27) {
-        popupBack.classList.remove('popup__active');
-        conteiner.classList.remove('disabled');
+        popup.classList.remove('popup__active');
         body.style.backgroundColor = '';
         body.style.overflow = '';
     };
 }
+    // close outside of Popup container
+const handlerOutsideClosePopup = function (e) {
+    console.log(e.target.closest);
+    if(!e.target.closest('.popup__container')) {
+        closePopup();
+    }
+}
 
 popupClose.addEventListener('click', closePopup);
-// main.addEventListener('click', closePopup1)
-document.addEventListener('keydown', closePopup2)
+popup.addEventListener('click', handlerOutsideClosePopup)
+document.addEventListener('keydown', handlerEscClosePopup)
 
 // https://sb-cats.herokuapp.com/
