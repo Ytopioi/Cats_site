@@ -1,16 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="img/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
-    <title></title>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <title>Cats</title>
 </head>
+
 <body>
 
-    <script defer src="js/cats.js"></script>    
+    <div class="popup popup__add__cat">
+        <form id="addCat" class="form__addCat">
+            <input type="number" placeholder="id" name="id" class="input-form">
+            <input type="text" placeholder="name" name="name" class="input-form">
+            <label><input type="checkbox" name="favourite" value="true" class="input-form"> favourite</label>
+            <input type="number" placeholder="rate" name="rate" class="input-form" min="0" max="10">
+            <input type="number" placeholder="age" name="age" class="input-form">
+            <input type="url" placeholder="img_link" name="img_link" class="input-form">
+            <textarea placeholder="description" name="description"></textarea>
+            <button type="submit">Добавить котика</button>
+        </form>
+    </div>
+
+
     <script defer src="js/script.js"></script>
 </body>
+
 </html>
