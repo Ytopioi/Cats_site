@@ -22,9 +22,7 @@ function getCats() {
             }
             return Promise.reject(resp)
         })
-        .then(({
-            data
-        }) => {
+        .then(({data}) => {
 
             localStorage.setItem('cats', JSON.stringify(data));
             return data;
@@ -33,7 +31,7 @@ function getCats() {
             console.log(err);
         })
 }
-getCats();
+
 
 let catS = JSON.parse(localStorage.getItem('cats'));
 
@@ -113,8 +111,8 @@ catS.forEach(cat => {
         <div class="container__catRate" data-rate='${cat.rate}'>
         </div>
         <div class="container__catButton">
-            <button class="catButton__delete">Удалить</button>
-            <button class="catButton_edit">Редактировать</button>
+            <button type="button" class="catButton__delete1">Удалить</button>
+            <button type="button" class="catButton_edit">Редактировать</button>
         </div>
 
     </div>`;
@@ -153,8 +151,10 @@ const showPopup = function (text) {
 }
 
 cards.forEach(el => {
-
+    console.log(cards[8]);
+    
     catS.forEach(cat => {
+        
         let n = '';
         if (cat.age === 1) {
             result = "год";
@@ -170,21 +170,51 @@ cards.forEach(el => {
                     <h2>${cat.name}</h2>
                     <p class="popup__text-age" data-age="${cat.age}">${cat.age} ${result}</p>
                     <p class="popup__text-descr">${cat.description}</p>
-                    <div class="container__catButton">
-                        <button class="catButton__delete">Удалить</button>
-                        <button class="catButton_edit">Редактировать</button>
-                    </div>
                 </div>
                 
             </div>`
         el.addEventListener('click', e => {
-            // console.log(e);
-
             if (el.getAttribute('id') == cat.id) {
-                showPopup(n)
+                showPopup(n);
             }
         })
+
+        //add event for Delete Button
+        const butDelete = el.querySelector('.catButton__delete1');
+        console.log(butDelete);
+        
+
+        butDelete.addEventListener('click', e => {
+            e.preventDefault();
+            let n = e.target.closest('.container__card');
+            
+            if (n.getAttribute('id') == cat.id) {
+                console.log("да");
+                fetch(`https://sb-cats.herokuapp.com/api/delete/${el.id}`, {
+                method: "DELETE"
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+    
+                    return Promise.reject(response)
+                })
+                .then((data) => {
+                    
+                    if(data.message === 'ok'){
+                        console.log("еще да");
+                        el.remove();
+                        const oldData = getLocalStorageData('cats');
+                        const newData = oldData.filter(item => item.id !== el.id);
+                        setLocalStorageData('cats', newData)
+                    }
+    
+                })
+            }
+        })        
     });
+
 
 })
 
@@ -205,25 +235,27 @@ tilda.innerHTML = `Icons are provided by Tilda Publishing`;
 footer.append(footerBox);
 footerBox.append(copyright, tilda);
 
-//add popup for AddCat
+
+//add functions for LocalStorage + API POST + popup for AddCat
 
 function formSerialize(form) {
-	const result = {}
+	const res = {}
 	const inputs = form.querySelectorAll('input');
+    const descr = form.querySelector('textarea');
 	console.log(inputs);
 
 	inputs.forEach(input => {
-		result[input.name] = input.value;
+		res[input.name] = input.value;
 	})
-	console.log(result);
+    res[descr.name] = descr.value
+	console.log(res);
 
-	return result;
+	return res;
 }
 
 const popupAddCat = document.querySelector('.popup__add__cat');
 const formAddCat = popupAddCat.querySelector('.form__addCat');
 const buttonAdd = formAddCat.querySelector('button');
-console.log(buttonAdd);
 
 function getLocalStorageData(key) {
 	return JSON.parse(localStorage.getItem(key));
@@ -241,13 +273,14 @@ const autoClosePopup = function (e) {
 }
 
 const reloadData = function() {
-	localStorage.clear();
-	container.innerHTML = '';
+    localStorage.clear();
+    container.innerHTML = '';
 	getCats();
-}
+    }
+
 
 formAddCat.addEventListener('submit', (event) => {
-    // console.log(event);
+    console.log(event);
 	event.preventDefault();
 	const bodyJSON = formSerialize(formAddCat);
 	
@@ -274,7 +307,6 @@ formAddCat.addEventListener('submit', (event) => {
 		.catch(err => {
 			console.log(err);
 		})
-
 })
 
 headerAddBut.addEventListener('click', (e) => {
@@ -284,7 +316,6 @@ headerAddBut.addEventListener('click', (e) => {
 //add closes functions
 //close button
 const closePopup = function (e) {
-    // console.log(e);
     popup.classList.remove('popup__active');
 
     body.style.backgroundColor = '';
@@ -313,6 +344,7 @@ document.addEventListener('keydown', handlerEscClosePopup)
 
 headerReloadBut.addEventListener('click', reloadData);
 
+getCats();
 
 
 // https://sb-cats.herokuapp.com/

@@ -1,13 +1,9 @@
 'use strict';
 
-
-
-
 console.log(Cookies.get('user'));
 // console.log(window.location);
 
 if (Cookies.get('user')) {
-	Cookies.set({expires: 0.01})
 	window.location.replace('/');
 }
 
