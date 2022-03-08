@@ -4,7 +4,7 @@ console.log(Cookies.get('user'));
 // console.log(window.location);
 
 if (Cookies.get('user')) {
-	window.location.replace('/');
+	window.location.replace('./');
 }
 
 
@@ -16,7 +16,7 @@ authForm.addEventListener('submit', (e) => {
 	if (inputName.value.trim() !== "") {
 		document.cookie = `user=${inputName.value}; secure; samesite = lax;`
 		inputName.value = "";
-		window.location.replace('/');
+		window.location.replace('./');
 	} else {
 		alert('Введите данные перед сохранением')
 	}

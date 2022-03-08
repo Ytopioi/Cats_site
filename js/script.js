@@ -2,8 +2,9 @@
 
 //check cookie
 
+
 if (!Cookies.get('user')) {
-    window.location.replace('/authorize.html');
+    window.location.replace('./authorize.html');
 }
 
 // common elements
@@ -14,6 +15,7 @@ const body = document.querySelector('body');
 body.className = 'body';
 
 function getCats() {
+    if (localStorage.length == 0) {
     return fetch('https://sb-cats.herokuapp.com/api/show')
         .then((resp) => {
             if (resp.ok) {
@@ -30,12 +32,13 @@ function getCats() {
         .catch(err => {
             console.log(err);
         })
+    }
 }
 
 
 let catS = JSON.parse(localStorage.getItem('cats'));
 
-//add modal popup
+//add modal popup and form add and form edit
 
 const popup = document.createElement('div');
 const popupContainer = document.createElement('div');
@@ -51,6 +54,33 @@ popupClose.style.backgroundImage = `url(${imgNeed[1]})`;
 popupContainer.append(popupCont, popupClose);
 popup.append(popupContainer)
 body.append(popup);
+
+const popupAddCat = document.querySelector('.popup__add__cat');
+const formAddCat = popupAddCat.querySelector('.form__addCat');
+const buttonAdd = formAddCat.querySelector('button');
+
+const popupEditCat = document.querySelector('.popup__edit__cat');
+const formEditCat = popupEditCat.querySelector('.form__editCat');
+const buttonEdit = formEditCat.querySelector('button');
+
+//function for Edit form with existing data
+function handleClickCatEdit(e) {
+	const inputs = formEditCat.querySelectorAll('input');
+    const descr = formEditCat.querySelector('textarea')
+
+    let n = e.target.closest('.container__card');
+
+    catS.forEach(cat => {
+        inputs.forEach(input => {
+            if(n.getAttribute('id') == cat.id){
+                input.setAttribute('value', cat[input.name])
+                descr.innerText = cat.description;
+            }        
+        })
+    })
+    showPopup(formEditCat.innerHTML);
+}
+
 
 //add header, main, footer
 
@@ -93,7 +123,10 @@ rightHeaderCont.append(headerReloadBut, headerAddBut, contact)
 headerBox.append(logo, rightHeaderCont);
 header.append(headerBox);
 
-
+//add event button AddCat
+headerAddBut.addEventListener('click', (e) => {
+    showPopup(formAddCat.outerHTML)
+})
 
 //add cards to main
 const container = document.createElement('div');
@@ -140,8 +173,13 @@ rateCont.forEach(el => {
     el.innerHTML += n;
 })
 
-//add event to cards to open popup
+//add event to cards to open popup + delete + edit
 const cards = document.querySelectorAll('.container__card');
+const popupDelete = document.querySelector('.popup__delete-cont');
+const butYesDelete = document.querySelector('.btn__yes');
+const butNoDelete = document.querySelector('.btn__no');
+
+
 let result = '';
 
 const showPopup = function (text) {
@@ -150,13 +188,12 @@ const showPopup = function (text) {
     popupCont.innerHTML = text;
 }
 
+// add card's popup
 cards.forEach(el => {
-    console.log(cards[8]);
-    
     catS.forEach(cat => {
         
         let n = '';
-        if (cat.age === 1) {
+        if (cat.age % 10) {
             result = "год";
         } else if (cat.age >= 2 && cat.age < 5) {
             result = 'года';
@@ -179,43 +216,83 @@ cards.forEach(el => {
             }
         })
 
-        //add event for Delete Button
-        const butDelete = el.querySelector('.catButton__delete1');
-        console.log(butDelete);
-        
+    });
+})
 
-        butDelete.addEventListener('click', e => {
-            e.preventDefault();
-            let n = e.target.closest('.container__card');
-            
-            if (n.getAttribute('id') == cat.id) {
+// add event for Delete Button + Edit Button
+cards.forEach(card => {
+    const butDelete = card.querySelector('.catButton__delete1');
+    butDelete.addEventListener('click', e => {
+        e.stopPropagation();
+        let n = e.target.closest('.container__card');
+                
+        if (n.getAttribute('id') == card.id) {
+            if(confirm('Вы удаляете котика')) {
                 console.log("да");
-                fetch(`https://sb-cats.herokuapp.com/api/delete/${el.id}`, {
-                method: "DELETE"
-            })
+                fetch(`https://sb-cats.herokuapp.com/api/delete/${card.id}`, {
+                    method: "DELETE"
+                })
                 .then((response) => {
                     if (response.ok) {
                         return response.json();
                     }
-    
+                
                     return Promise.reject(response)
                 })
                 .then((data) => {
-                    
+                        
                     if(data.message === 'ok'){
                         console.log("еще да");
-                        el.remove();
+                        card.remove();
                         const oldData = getLocalStorageData('cats');
-                        const newData = oldData.filter(item => item.id !== el.id);
+                        const newData = oldData.filter(item => item.id !== card.id);
                         setLocalStorageData('cats', newData)
                     }
-    
+                
                 })
             }
-        })        
-    });
+        }
+    })
+    
+    //add event for Edit Button
+    const butEdit = card.querySelector('.catButton_edit');
+    
+    butEdit.addEventListener('click', e => {
+        e.stopPropagation();
+        let n = e.target.closest('.container__card');
 
+        if (n.getAttribute('id') == card.id) {
+            handleClickCatEdit(e);
+        
+            const butEditSend = formEditCat.querySelector('button')
 
+            formEditCat.addEventListener('submit', (e) => {
+                console.log(e);
+                fetch(`https://sb-cats.herokuapp.com/api/update/${card.id}`, {
+                    method: "PUT",
+                    headers: {
+                        'Content-type': "application/json"
+                    },
+                    //todo body: --?
+                })
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    return Promise.reject(response)
+                })
+                .then((data) => {
+                        
+                if(data.message === 'ok'){
+                    console.log("еще да");
+                    const oldData = getLocalStorageData('cats');
+                    //todo const newData = oldData.filter(item => item.id !== card.id);
+                    //todo setLocalStorageData('cats', newData)
+                }
+                })
+            })
+        }
+    })
 })
 
 
@@ -253,9 +330,6 @@ function formSerialize(form) {
 	return res;
 }
 
-const popupAddCat = document.querySelector('.popup__add__cat');
-const formAddCat = popupAddCat.querySelector('.form__addCat');
-const buttonAdd = formAddCat.querySelector('button');
 
 function getLocalStorageData(key) {
 	return JSON.parse(localStorage.getItem(key));
@@ -309,9 +383,7 @@ formAddCat.addEventListener('submit', (event) => {
 		})
 })
 
-headerAddBut.addEventListener('click', (e) => {
-    showPopup(formAddCat.outerHTML)
-})
+
 
 //add closes functions
 //close button

@@ -26,6 +26,28 @@
         </form>
     </div>
 
+    <div class="popup popup__edit__cat">
+        <form id="editCat" class="form__editCat">
+            <input type="number" placeholder="id" name="id" class="input-form">
+            <input type="text" placeholder="name" name="name" class="input-form">
+            <label><input type="checkbox" name="favourite" value="true" class="input-form"> favourite</label>
+            <input type="number" placeholder="rate" name="rate" class="input-form" min="0" max="10">
+            <input type="number" placeholder="age" name="age" class="input-form">
+            <input type="url" placeholder="img_link" name="img_link" class="input-form">
+            <textarea placeholder="description" name="description"></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+
+
+    <div class="popup popup__delete">
+        <div class="popup__delete-cont">
+            <h3 class="popup__delete-title">Вы уверенны, что хотите удалить котика?</h3>
+            <button type="button" class="btn__yes">Да</button>
+            <button type="button" class="btn__no">Нет</button>
+        </div>
+    </div>
+
 
     <script defer src="js/script.js"></script>
 </body>
